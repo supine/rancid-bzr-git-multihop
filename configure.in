@@ -25,7 +25,7 @@ if test $MAKE = no; then
     unset ac_cv_path_MAKE
     AC_PATH_PROG(MAKE,make,no)
     if test $MAKE = no; then
-        AC_MSG_ERROR([can't locate a make.])
+        AC_MSG_ERROR([cant locate a make.])
 	exit 1
     fi
 fi
@@ -157,6 +157,42 @@ AC_ARG_WITH(svn,
 ], [AC_MSG_RESULT(no)
     RCSSYS="cvs"
 ])
+AC_ARG_WITH(bzr,
+	AS_HELP_STRING([--with-bzr=yes],
+			[use bazaar instead of cvs]),
+[ case "$withval" in
+  yes)
+	AC_MSG_RESULT(yes)
+	RCSSYS="bzr"
+	;;
+  no)
+	AC_MSG_RESULT(no)
+	RCSSYS="cvs"
+	;;
+  *)
+	AC_MSG_ERROR([unknown bzr flag $withval])
+  esac
+], [AC_MSG_RESULT(no)
+    RCSSYS="cvs"
+])
+AC_ARG_WITH(git,
+	AS_HELP_STRING([--with-git=yes],
+			[use git instead of cvs]),
+[ case "$withval" in
+  yes)
+	AC_MSG_RESULT(yes)
+	RCSSYS="git"
+	;;
+  no)
+	AC_MSG_RESULT(no)
+	RCSSYS="cvs"
+	;;
+  *)
+	AC_MSG_ERROR([unknown git flag $withval])
+  esac
+], [AC_MSG_RESULT(no)
+    RCSSYS="cvs"
+])
 AC_SUBST(RCSSYS)
 AC_SUBST(SVN_FSTYPE)
 rd_cv_RCSSYS=$RCSSYS
@@ -236,7 +272,7 @@ if test "$DIFF" = "" ; then
     DIFF_CMD=$ADIFF_CMD
 fi
 if test "$DIFF" = "" ; then
-    AC_MSG_ERROR([can't locate diff.])
+    AC_MSG_ERROR([cant locate diff.])
 fi
 AC_MSG_RESULT([${DIFF_CMD}])
 rd_cv_DIFF=$DIFF
@@ -283,7 +319,7 @@ AC_SUBST(EXPECT_PATH)
 AC_PATH_PROG(PING_PATH,[ping],[no],
 	     [$PATH$PATH_SEPARATOR/sbin$PATH_SEPARATOR/usr/sbin])
 if test $PING_PATH = no; then
-    AC_MSG_ERROR([can't locate ping.])
+    AC_MSG_ERROR([cant locate ping.])
     exit 1
 fi
 # ping seems to take one of two formats for count (N)
@@ -302,7 +338,7 @@ else
 	if test $? -eq 0 ; then
 	    LG_PING_CMD="$PING_PATH -n 1" 
 	else
-            AC_MSG_ERROR([can't figure out how to pass count == 1 to $PING_PATH.])
+            AC_MSG_ERROR([cant figure out how to pass count == 1 to $PING_PATH.])
 	    exit 1
 	fi
     fi
@@ -316,13 +352,24 @@ rd_cv_lg_ping_cmd=$LG_PING_CMD
 ENV_PATH="`dirname $PERLV_PATH`:`dirname $EXPECT_PATH`:`dirname $SENDMAIL`"
 ENV_PATH="$ENV_PATH:`dirname $DIRNAME`:`dirname $DIFF`"
 
-if test $RCSSYS = "cvs" ; then
-    AC_PATH_PROG(CVS,cvs,no)
-    ENV_PATH="$ENV_PATH:`dirname $ac_cv_path_CVS`"
-else
-    AC_PATH_PROG(SVN,svn,no)
-    ENV_PATH="$ENV_PATH:`dirname $ac_cv_path_SVN`"
-fi
+case "$RCSSYS" in
+  svn)
+        AC_PATH_PROG(SVN,svn,no)
+        ENV_PATH="$ENV_PATH:`dirname $ac_cv_path_SVN`"
+        ;;
+  bzr)
+        AC_PATH_PROG(BZR,bzr,no)
+        ENV_PATH="$ENV_PATH:`dirname $ac_cv_path_BZR`"
+        ;;
+  git)
+        AC_PATH_PROG(GIT,git,no)
+        ENV_PATH="$ENV_PATH:`dirname $ac_cv_path_GIT`"
+        ;;
+  *)
+        AC_PATH_PROG(CVS,cvs,no)
+        ENV_PATH="$ENV_PATH:`dirname $ac_cv_path_CVS`"
+        ;;
+esac
 AC_PATH_PROG(COMM,comm,no)
 ENV_PATH="$ENV_PATH:`dirname $ac_cv_path_COMM`"
 AC_PATH_PROG(FIND,find,no)

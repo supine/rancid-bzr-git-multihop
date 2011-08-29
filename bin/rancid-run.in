@@ -146,8 +146,13 @@ do
 	    @PERLV@ -e "\$t = (stat(\"$LOCKFILE\"))[9]; print \"OLD\\n\" if (time() - \$t >= $LOCKTIME*60*60);" > $TMPDIR/.$GROUP.old
 	    if [ -s $TMPDIR/.$GROUP.old ]
 	    then
-		(
-		  echo "To: @ADMINMAILPLUS@${GROUP}${MAILDOMAIN}"
+                if [ $OVERRIDEADDRESS ]; then
+                        recipient=${OVERRIDEADDRESS}
+                else
+                        recipient=@ADMINMAILPLUS@${GROUP}${MAILDOMAIN}
+                fi
+                (
+		  echo "To: ${recipient}"
 		  echo "Subject: rancid hung - $GROUP"
 		  echo "Precedence: bulk"
 		  echo ""

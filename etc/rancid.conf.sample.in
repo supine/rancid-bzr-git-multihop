@@ -25,9 +25,9 @@ CVSROOT=$BASEDIR/CVS; export CVSROOT
 # Location of log files produced by rancid-run(1).
 LOGDIR=$BASEDIR/logs; export LOGDIR
 #
-# Select which RCS system to use, "cvs" (default) or "svn".  Do not change
-# this after CVSROOT has been created with rancid-cvs.  Changing between these
-# requires manual conversions.
+# Select which RCS system to use, "cvs" (default) or "svn" or "bzr" or "git".
+# Do not change this after CVSROOT has been created with rancid-cvs. Changing
+# between these requires manual conversions.
 RCSSYS=@RCSSYS@; export RCSSYS
 #
 # if ACLSORT is NO, access-lists will NOT be sorted.
@@ -82,3 +82,8 @@ RCSSYS=@RCSSYS@; export RCSSYS
 # it to "" or adding X- style headers.  Individual headers must be separated
 # by a \n.
 #MAILHEADERS="Precedence: bulk"; export MAILHEADERS
+#
+# By default, rancid will mail messages to rancid-admin-${GROUP} and
+# rancid-${GROUP}. OVERRIDEADDRESS allows you to override that and have
+# everything sent to the same address.
+#OVERRIDEADDRESS="address@example.com"; export OVERRIDEADDRESS
