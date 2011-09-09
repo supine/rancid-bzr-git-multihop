@@ -89,7 +89,7 @@ if ($vendorspec =~ /wrapper/) {
     'riverstone'	=> 'rivrancid',
     'smc'		=> 'srancid',
     'tnt'		=> 'tntrancid',
-    'zebra'		=> 'zrancid'
+    'zebra'		=> 'zrancid',
     # Not really a vendor:
     'wrapper'           => 'wraprancid',
 );
