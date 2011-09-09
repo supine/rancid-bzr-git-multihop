@@ -53,7 +53,7 @@ dist_pkgdata_SCRIPTS=getipacctg
 dist_pkgdata_DATA=README.misc cisco-load.exp cisco-reload.exp \
 	index.html lgnotes.html
 
-EXTRA_DIST = rancid.spec rtrfilter.in downreport.in
+EXTRA_DIST = rancid.spec rtrfilter.in downreport.in 
 
 CLEANFILES= downreport
 

@@ -47,6 +47,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/avologin.in $(srcdir)/avorancid.in \
 	$(srcdir)/blogin.in $(srcdir)/brancid.in \
 	$(srcdir)/cat5rancid.in $(srcdir)/clogin.in \
+	$(srcdir)/cloginrc2pl.exp.in \
 	$(srcdir)/control_rancid.in $(srcdir)/cssrancid.in \
 	$(srcdir)/elogin.in $(srcdir)/erancid.in \
 	$(srcdir)/f10rancid.in $(srcdir)/f5rancid.in \
@@ -75,7 +76,7 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/include/config.h
 CONFIG_CLEAN_FILES = control_rancid par rancid-fe agmrancid alogin \
 	arancid arrancid avologin avorancid blogin brancid cat5rancid \
-	clogin rancid cssrancid elogin erancid f5rancid f10rancid \
+	clogin cloginrc2pl.exp rancid cssrancid elogin erancid f5rancid f10rancid \
 	flogin francid fnlogin fnrancid hlogin hrancid htlogin \
 	htrancid jlogin jrancid jerancid mrancid mrvlogin mrvrancid \
 	nlogin nrancid nslogin nsrancid nxrancid prancid rivlogin \
@@ -246,7 +247,7 @@ top_srcdir = @top_srcdir@
 #AUTOMAKE_OPTIONS=foreign no-dependencies
 AUTOMAKE_OPTIONS = foreign
 bin_SCRIPTS = agmrancid alogin arancid arrancid avologin avorancid \
-	blogin brancid cat5rancid clogin control_rancid cssrancid \
+	blogin brancid cat5rancid clogin cloginrc2pl.exp control_rancid cssrancid \
 	elogin erancid f5rancid f10rancid flogin fnlogin fnrancid \
 	francid hlogin hrancid htlogin htrancid jerancid jlogin \
 	jrancid mrancid mrvlogin mrvrancid nlogin nrancid nslogin \
@@ -347,6 +348,8 @@ brancid: $(top_builddir)/config.status $(srcdir)/brancid.in
 cat5rancid: $(top_builddir)/config.status $(srcdir)/cat5rancid.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 clogin: $(top_builddir)/config.status $(srcdir)/clogin.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+cloginrc2pl.exp: $(top_builddir)/config.status $(srcdir)/cloginrc2pl.exp.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 rancid: $(top_builddir)/config.status $(srcdir)/rancid.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@

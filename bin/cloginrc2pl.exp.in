@@ -1,0 +1,101 @@
+#! @EXPECT_PATH@ --
+
+# usage: cloginrc2pl.exp <cloginrc-name>
+
+# convert RANCID cloginrc database to perl
+# called by a Perl program that wants to parse cloginrc
+# output is Perl commands to be eval'd into calling Perl program
+
+# turn each set of "add directive_name hostglob value0 value1 ..." lines
+# into a single Perl array of arrays, which is stored into a hash
+# for lookup by 'directive_name'
+
+# perl structure:
+#  $_cloginrc_data{$directive}= [ [hostglob, value0, value1, ...],
+#                                 [hostglob, value, ...],
+#                                 ...
+#                               ]
+
+proc dump {var} {
+    upvar int_$var list
+	puts -nonewline "\$Rancid::ParseConfig::_cloginrc_data{'$var'}= \[ "
+	foreach inputline $list {
+		set hostglob [lindex $inputline 0]
+		set valuelist [lreplace $inputline 0 0 ]
+		puts -nonewline "\[ '$hostglob', "
+		foreach thing $valuelist {
+			# Perl single quotes support \\ and \' escapes
+			regsub -all {\\} $thing {\\\\} thing
+			regsub -all {'} $thing {\\'} thing
+			puts -nonewline "'$thing',"
+		}
+		puts -nonewline "], "
+	}
+	puts "\];"
+}
+
+# code below stolen from clogin, with slight modification
+
+# This is a helper function to make the password file easier to
+# maintain.  Using this the password file has the form:
+# add password sl*	pete cow
+# add password at*	steve
+# add password *	hanky-pie
+
+proc add {var args} {
+	global int_$var
+	global addlist
+	lappend int_$var $args
+	lappend addlist $var
+}
+proc include {args} {
+    global env
+    regsub -all "(^{|}$)" $args {} args
+    if { [ regexp "^/" $args ignore ] == 0 } {
+	set args $env(HOME)/$args
+    }
+    source_password_file $args
+}
+
+proc find {var router} {
+    upvar int_$var list
+    if { [info exists list] } {
+	foreach line $list {
+	    if { [string match [lindex $line 0] $router ] } {
+		return [lrange $line 1 end]
+	    }
+	}
+    }
+    return {}
+}
+
+# Loads the password file.  Note that as this file is tcl, and that
+# it is sourced, the user better know what to put in there, as it
+# could install more than just password info...  I will assume however,
+# that a "bad guy" could just as easy put such code in the clogin
+# script, so I will leave .cloginrc as just an extention of that script
+proc source_password_file { password_file } {
+    global env
+    if { ! [file exists $password_file] } {
+	puts "die 'Error: password file ($password_file) does not exist';"
+	exit 1
+    }
+    file stat $password_file fileinfo
+    if { [expr ($fileinfo(mode) & 007)] != 0000 } {
+	puts "die 'Error: $password_file must not be world readable/writable';"
+	exit 1
+    }
+    if [ catch {source $password_file} reason ] {
+	puts "die 'Error: $reason';"
+	exit 1
+    }
+}
+
+# main - get the filename from the command line, source it, dump it
+
+set arg [lindex $argv 0]
+source_password_file $arg
+
+foreach var [lsort -unique $addlist] {
+ 	dump $var
+}
