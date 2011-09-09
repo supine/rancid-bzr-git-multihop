@@ -6077,6 +6077,8 @@ ac_config_files="$ac_config_files bin/tntlogin bin/tntrancid"
 
 ac_config_files="$ac_config_files bin/trancid"
 
+ac_config_files="$ac_config_files bin/vpn3k.wrapplugin bin/wraprancid"
+
 ac_config_files="$ac_config_files bin/xrancid"
 
 ac_config_files="$ac_config_files bin/xrrancid"
@@ -6860,6 +6862,8 @@ do
     "bin/tntlogin") CONFIG_FILES="$CONFIG_FILES bin/tntlogin" ;;
     "bin/tntrancid") CONFIG_FILES="$CONFIG_FILES bin/tntrancid" ;;
     "bin/trancid") CONFIG_FILES="$CONFIG_FILES bin/trancid" ;;
+    "bin/vpn3k.wrapplugin") CONFIG_FILES="$CONFIG_FILES bin/vpn3k.wrapplugin" ;;
+    "bin/wraprancid") CONFIG_FILES="$CONFIG_FILES bin/wraprancid" ;;
     "bin/xrancid") CONFIG_FILES="$CONFIG_FILES bin/xrancid" ;;
     "bin/xrrancid") CONFIG_FILES="$CONFIG_FILES bin/xrrancid" ;;
     "bin/zrancid") CONFIG_FILES="$CONFIG_FILES bin/zrancid" ;;
@@ -7590,6 +7594,8 @@ $as_echo X"$file" |
     "bin/tntlogin":F) chmod a+x $ac_file ;;
     "bin/tntrancid":F) chmod a+x $ac_file ;;
     "bin/trancid":F) chmod a+x $ac_file ;;
+    "bin/vpn3k.wrapplugin":F) chmod a+x $ac_file ;;
+    "bin/wraprancid":F) chmod a+x $ac_file ;;
     "bin/xrancid":F) chmod a+x $ac_file ;;
     "bin/xrrancid":F) chmod a+x $ac_file ;;
     "bin/zrancid":F) chmod a+x $ac_file ;;
