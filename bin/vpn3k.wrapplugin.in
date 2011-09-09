@@ -1,0 +1,110 @@
+#! @PERLV_PATH@
+#
+# vpn3k - SCP and SNMP Backup script for Cisco VPN 3K concentrators
+#         to be used by the wrancid rancid wrapper
+#
+# WARNING: This is only PROOF OF CONCEPT code and will screw up your data
+#          and eat babies!!!
+#
+# Copyright 2005 Michael Stefaniuc for Red Hat
+#
+# This script is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+#######################################################
+# Modules
+#######################################################
+
+# Load any modules needed
+use strict;
+use lib '/usr/lib/perl5/vendor_perl/5.8.8';
+use lib '/usr/local/rancid/share/libperl';
+use Getopt::Std;
+use Net::SCP::Expect;
+use File::Temp;
+use Rancid::ParseConfig;
+use File::Temp qw/ tempfile tempdir /;
+
+#######################################################
+# Variables
+#######################################################
+
+# Initialize variables used in this script
+
+load_rancid_config();
+
+my %options = ();
+getopts('f:', \%options);
+my $file = $options{'f'};
+my $host = $ARGV[0];
+my $backup_user = find_rancid_config("user", $host, 0); 
+my $backup_pass = find_rancid_config("password", $host, 0); 
+my $snmp_community = find_rancid_config("snmp_community", $host, 0); 
+
+# Open the output file.
+my $fh;
+open($fh, ">", $file) or die "Cannot open output file\n";
+print($fh "#RANCID-CONTENT-TYPE: wrapper.vpn3k\n#\n");
+
+# Get some infos from snmp
+my $snmp_command = "snmpget -v2c -c $snmp_community -On $host .1.3.6.1.2.1.1.1.0";
+my $result = `$snmp_command`;
+chomp($result);
+if ($result =~ /VPN 3000 Concentrator Version (\S+) built by (\S+) on (.+)$/i) {
+    my $version = $1;
+    my $compiled = "$3 by $2";
+    print($fh "#Chassis Type: VPN 3000\n#\n");
+    $snmp_command = "snmpget -v2c -c $snmp_community -On $host .1.3.6.1.2.1.47.1.1.1.1.11.1";
+    $result = `$snmp_command`;
+    chomp($result);
+    if ($result =~ /"([^"]+)"/) {
+	print($fh "#Serial Number: $1\n#\n");
+    }
+    print($fh "#Image: Version: $version\n");
+    print($fh "#Image: Compiled: $compiled\n#\n");
+}
+
+# Call scp and download the running config.
+my $scp_session = Net::SCP::Expect->new( user => "$backup_user", password => "$backup_pass", auto_yes => "1");
+# the connection sometimes terminates incorrectly but we fully transfered
+# the file
+(my $tempfh, my $tempfile) = tempfile();
+eval { $scp_session->scp("$host:config", $tempfile); };
+
+# Copy the config file over removing the comment at the beginning
+open($tempfh, "<", $tempfile) or die "Scp seems to have failed\n";
+
+my $line;
+my $filter_pwds = $ENV{"FILTER_PWDS"} ? $ENV{"FILTER_PWDS"}: "yes";
+while ($line = <$tempfh>) {
+    if ($line =~ /^#/) {
+	next;
+    }
+    elsif ($filter_pwds =~ /yes/i) {
+	if ($line =~ /^trapcomm.*/) {
+	   $line = "trapcomm=<removed>\n";
+	}
+	elsif ($line =~ /^password.*/) {
+	   $line = "password=<removed>\n";
+	}
+    }
+    print($fh $line);
+}
+
+#######
+# End #
+#######
+close($fh);
+close($tempfh);
+unlink($tempfile);

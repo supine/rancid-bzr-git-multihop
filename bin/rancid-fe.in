@@ -47,8 +47,15 @@
 
 require 5;
 
-($router, $vendor) = split('\:', $ARGV[0]);
-$vendor =~ tr/[A-Z]/[a-z]/;
+($router, $vendorspec) = split('\:', $ARGV[0]);
+$vendorspec =~ tr/[A-Z]/[a-z]/;
+# The 'wrapper' vendor is treated specially, and is appended by a hyphen
+# plus an argument which specifies the wrapper plugin to be executed:
+if ($vendorspec =~ /wrapper/) {
+        ($vendor, $vendorargs) = split(/-/, $vendorspec);
+} else {
+        $vendor = $vendorspec;
+}
 
 %vendortable = (
     'agm'		=> 'agmrancid',
@@ -83,13 +90,23 @@ $vendor =~ tr/[A-Z]/[a-z]/;
     'smc'		=> 'srancid',
     'tnt'		=> 'tntrancid',
     'zebra'		=> 'zrancid'
+    # Not really a vendor:
+    'wrapper'           => 'wraprancid',
 );
 
 if ($vendortable{$vendor} eq "") {
     printf(STDERR "unknown router manufacturer for $router: $vendor\n");
     exit(-1);
 } else {
-    exec($vendortable{$vendor} . " $router");
+    $cmd = $vendortable{$vendor};
+    # The 'wrapper' vendor is a special case:
+    if ( $vendor eq "wrapper" ) {
+        @cmdargs = ("-s", "$vendorargs.wrapplugin");
+    } else {
+        @cmdargs = ();
+    };
+    @exec = ("$cmd", @cmdargs, "$router");
+    exec(@exec);
 }
 
 printf(STDERR "exec failed router manufacturer $vendor: $!\n");
