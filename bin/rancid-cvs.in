@@ -110,23 +110,9 @@ if [ ! -d $CVSROOT ]; then
 	svn)
 	    svnadmin create $CVSROOT @SVN_FSTYPE@
 	    ;;
-	bzr)
-	    echo "bzr doesn't need a separate root. Continuing on..."
+	bzr | git)
+	    echo "$RCSSYS doesn't need a separate root. Continuing on..."
 	    ;;
-	git)
-	    # git does not use $CVSROOT, instead configs are stored in $BASEDIR
-	    (
-		flock -x 200
-		git init
-		rm -f .gitignore
-		echo "/logs" >> .gitignore
-		echo "/.lockfile" >> .gitignore
-		echo "*~" >> .gitignore
-		echo ".#*" >> .gitignore
-		echo "*.new" >> .gitignore
-		git add .gitignore
-		git commit -m "Initializing repository."
-	    ) 200>$BASEDIR/.lockfile
     esac
 fi
 
@@ -167,21 +153,27 @@ do
 		bzr init .
 		;;
 	    git )
-		cd $BASEDIR
-		echo "$GROUP/routers.all" >> .gitignore
-		echo "$GROUP/routers.down" >> .gitignore
-		echo "$GROUP/routers.up" >> .gitignore
-		echo "$GROUP/routers.mail" >> .gitignore
-		echo "$GROUP/routers.added" >> .gitignore
-		echo "$GROUP/routers.deleted" >> .gitignore
-		echo "$GROUP/routers.single" >> .gitignore
-		echo "$GROUP/routers.up.missed" >> .gitignore
-		echo "$GROUP/routers.failed" >> .gitignore
-		(
+	    	(
 		    flock -x 200
+		    git init
+		    rm -f .gitignore
+		    echo "/logs" >> .gitignore
+		    echo "/.lockfile" >> .gitignore
+		    echo "*~" >> .gitignore
+		    echo ".#*" >> .gitignore
+		    echo "*.new" >> .gitignore
+		    echo "routers.all" >> .gitignore
+		    echo "routers.down" >> .gitignore
+		    echo "routers.up" >> .gitignore
+		    echo "routers.mail" >> .gitignore
+		    echo "routers.added" >> .gitignore
+		    echo "routers.deleted" >> .gitignore
+		    echo "routers.single" >> .gitignore
+		    echo "routers.up.missed" >> .gitignore
+		    echo "routers.failed" >> .gitignore
 		    git add .gitignore
-		    git commit -m "Update .gitignore"
-		) 200>$BASEDIR/.lockfile
+		    git commit -m "Initializing repository."
+	    	) 200>$BASEDIR/.lockfile
 		;;
 	esac
     fi
@@ -192,6 +184,19 @@ do
 	    cvs | svn | bzr)
 		$RCSSYS add configs
 		$RCSSYS commit -m 'new' configs
+		;;
+	    git)
+		# nothing to be done here
+		;;
+	esac
+    fi
+
+    if [ ! -d archive ]; then
+	mkdir archive
+	case $RCSSYS in
+	    cvs | svn | bzr)
+		$RCSSYS add archive
+		$RCSSYS commit -m 'new' archive
 		;;
 	    git)
 		# nothing to be done here
