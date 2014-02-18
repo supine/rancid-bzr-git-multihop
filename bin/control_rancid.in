@@ -607,7 +607,7 @@ case $RCSSYS in
 	      git add configs/$router
 	    done
 	    # Commit message is a list of changed files
-	    git commit -m "`git diff --name-only -- . | sed 's/configs.//' | tr '\n' ' '`"
+	    git commit -m "`git diff --name-only --cached -- . | sed 's/configs.//' | tr '\n' ' '`"
 	    if [ $? -eq 0 ]; then
 		# only generate a diff if the commit was successful
 		git diff --unified --stat HEAD^ HEAD -- . >$TMP.diff
